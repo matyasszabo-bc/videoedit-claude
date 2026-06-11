@@ -1,27 +1,12 @@
-# Project-generated files — do not commit
-# These are created per-project and live in the Premiere project folder, not here.
-
-# Silence analysis output
+# Project-specific progress and config files
+EDIT-PROGRESS.md
+visual-instructions.md
 silence-log.txt
 
-# Visual instructions extracted from screenplay
-visual-instructions.md
-
-# Remotion render output
+# Remotion / animation outputs
 animations/out/
 animations/node_modules/
+animations/.remotion/
 
-# Exported audio for ffmpeg analysis
-*.wav
-*.aac
-
-# Packed project output
-*-pack/
-
-# OS
+# macOS
 .DS_Store
-Thumbs.db
-
-# Editor
-.vscode/
-.idea/

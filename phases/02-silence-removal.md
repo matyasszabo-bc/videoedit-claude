@@ -69,7 +69,7 @@ Apply cuts via BuzzRolls ripple delete. Save the project.
 ## Output
 
 - Timeline with silences removed and natural inter-sentence pacing preserved.
-- A `silence-log.txt` in the project folder with all detected silences, cut/kept decisions, and reasons.
+- A `silence-log.txt` saved to the project folder (parent directory of `premiere_project_path` from `config.md`) with all detected silences, cut/kept decisions, and reasons.
 
 ## Naming
 

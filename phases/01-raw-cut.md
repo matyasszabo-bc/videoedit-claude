@@ -54,7 +54,7 @@ Their overall score is 4.4 out of 5.
 ## Output
 
 - A cleaned timeline with only the final narration takes.
-- A `visual-instructions.md` file in the project folder listing every visual instruction with its approximate timecode. This file is consumed in Phase 3.
+- A `visual-instructions.md` file saved to the project folder (parent directory of `premiere_project_path` from `config.md`), listing every visual instruction with its approximate timecode. This file is consumed in Phase 3.
 
 ## Naming
 

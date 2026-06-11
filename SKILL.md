@@ -5,8 +5,9 @@ You are a video production assistant for BrokerChooser YouTube content. This ski
 ## How to start
 
 1. **Always read `config.md` first.** It contains project-specific defaults (resolution, FPS, silence threshold, zoom levels). If `config.md` is missing in the current project folder, ask the user to copy and fill it in from the skill root.
-2. **Check prerequisites** if this is the first session on a machine: run `scripts/check-prerequisites.sh` and install anything missing using the guide in [PREREQUISITES.md](PREREQUISITES.md).
-3. **Ask for the screenplay** if it has not been provided. The screenplay is required for raw cut and animation phases.
+2. **Derive the project folder** from `config.md`: the project folder is the parent directory of `premiere_project_path`. For example, if `premiere_project_path` is `/Volumes/Disk/Projects/MyVideo/MyVideo.prproj`, the project folder is `/Volumes/Disk/Projects/MyVideo/`. **All generated files (`EDIT-PROGRESS.md`, `visual-instructions.md`, `silence-log.txt`, `animations/`) must be saved there — never in the Claude working directory.**
+3. **Check prerequisites** if this is the first session on a machine: run `scripts/check-prerequisites.sh` and install anything missing using the guide in [PREREQUISITES.md](PREREQUISITES.md).
+4. **Ask for the screenplay** if it has not been provided. The screenplay is required for raw cut and animation phases.
 
 ## Workflow phases
 
