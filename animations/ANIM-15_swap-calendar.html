@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>ANIM-15 Swap Calendar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1920px;
+    height: 1080px;
+    background: transparent;
+    font-family: 'IBM Plex Sans', sans-serif;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .scene {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+  }
+
+  /* ── Calendar card ── */
+  .calendar-card {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.00) 60%),
+      rgba(10, 15, 30, 0.80);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 40px;
+    backdrop-filter: blur(12px);
+    padding: 40px;
+    box-shadow:
+      0 0 40px rgba(59, 130, 246, 0.20),
+      0 0 80px rgba(59, 130, 246, 0.08),
+      0 40px 80px rgba(0,0,0,0.60),
+      0 16px 32px rgba(0,0,0,0.40);
+    width: 860px;
+  }
+
+  .card-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+  }
+
+  .day-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(20px) scale(0.92);
+    transition: none;
+  }
+
+  .day-label {
+    font-size: 22px;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 1px;
+  }
+
+  .day-box {
+    width: 100px;
+    height: 100px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* weekday */
+  .day-box.active {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+  }
+
+  /* wednesday */
+  .day-box.wednesday {
+    background: rgba(239, 68, 68, 0.25);
+    border: 1px solid rgba(239, 68, 68, 0.60);
+  }
+
+  /* weekend */
+  .day-box.weekend {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .moon-icon {
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  .charge-label {
+    font-size: 20px;
+    font-weight: 600;
+    color: #ef4444;
+    text-shadow: 0 0 20px rgba(239,68,68,0.60);
+  }
+
+  .charge-label.big {
+    font-size: 22px;
+  }
+
+  .triple-badge {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: #ef4444;
+    border-radius: 8px;
+    padding: 2px 7px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 12px rgba(239,68,68,0.70);
+    opacity: 0;
+    transform: scale(0.6);
+    transition: none;
+  }
+
+  .weekend-label {
+    font-size: 18px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.20);
+  }
+
+  /* ── Running total card ── */
+  .total-card {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.00) 60%),
+      rgba(10, 15, 30, 0.80);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 40px;
+    backdrop-filter: blur(12px);
+    padding: 40px 48px;
+    box-shadow:
+      0 0 40px rgba(239, 68, 68, 0.20),
+      0 0 80px rgba(239, 68, 68, 0.08),
+      0 40px 80px rgba(0,0,0,0.60),
+      0 16px 32px rgba(0,0,0,0.40);
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  .total-label {
+    font-size: 22px;
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-align: center;
+  }
+
+  .total-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    opacity: 0;
+    transform: translateX(12px);
+  }
+
+  .total-row-day {
+    font-size: 22px;
+    font-weight: 500;
+    color: #94a3b8;
+  }
+
+  .total-row-val {
+    font-size: 24px;
+    font-weight: 600;
+    color: #ef4444;
+    text-shadow: 0 0 20px rgba(239,68,68,0.50);
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    margin: 4px 0;
+    opacity: 0;
+  }
+
+  .total-sum-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  .total-sum-label {
+    font-size: 24px;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  .total-sum-val {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ef4444;
+    text-shadow: 0 0 30px rgba(239,68,68,0.70);
+  }
+
+  .per-week-note {
+    font-size: 18px;
+    font-weight: 400;
+    color: #94a3b8;
+    text-align: center;
+    opacity: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="scene">
+
+  <!-- Calendar -->
+  <div class="calendar-card">
+    <div class="card-title">Overnight swap charges — 1 week</div>
+
+    <div class="days-grid">
+      <!-- MON -->
+      <div class="day-cell" id="day-0">
+        <div class="day-label">MON</div>
+        <div class="day-box active">
+          <div class="moon-icon">🌙</div>
+          <div class="charge-label">-$1.80</div>
+        </div>
+      </div>
+
+      <!-- TUE -->
+      <div class="day-cell" id="day-1">
+        <div class="day-label">TUE</div>
+        <div class="day-box active">
+          <div class="moon-icon">🌙</div>
+          <div class="charge-label">-$1.80</div>
+        </div>
+      </div>
+
+      <!-- WED -->
+      <div class="day-cell" id="day-2">
+        <div class="day-label">WED</div>
+        <div class="day-box wednesday">
+          <div class="moon-icon">🌙</div>
+          <div class="charge-label big">-$5.40</div>
+          <div class="triple-badge" id="triple-badge">3× TRIPLE!</div>
+        </div>
+      </div>
+
+      <!-- THU -->
+      <div class="day-cell" id="day-3">
+        <div class="day-label">THU</div>
+        <div class="day-box active">
+          <div class="moon-icon">🌙</div>
+          <div class="charge-label">-$1.80</div>
+        </div>
+      </div>
+
+      <!-- FRI -->
+      <div class="day-cell" id="day-4">
+        <div class="day-label">FRI</div>
+        <div class="day-box active">
+          <div class="moon-icon">🌙</div>
+          <div class="charge-label">-$1.80</div>
+        </div>
+      </div>
+
+      <!-- SAT -->
+      <div class="day-cell" id="day-5">
+        <div class="day-label">SAT</div>
+        <div class="day-box weekend">
+          <div class="weekend-label">—</div>
+        </div>
+      </div>
+
+      <!-- SUN -->
+      <div class="day-cell" id="day-6">
+        <div class="day-label">SUN</div>
+        <div class="day-box weekend">
+          <div class="weekend-label">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Running total -->
+  <div class="total-card" id="total-card">
+    <div class="total-label">Running total</div>
+    <div class="total-rows" id="total-rows">
+      <div class="total-row" id="tr-0">
+        <div class="total-row-day">Mon</div>
+        <div class="total-row-val">-$1.80</div>
+      </div>
+      <div class="total-row" id="tr-1">
+        <div class="total-row-day">Tue</div>
+        <div class="total-row-val">-$3.60</div>
+      </div>
+      <div class="total-row" id="tr-2">
+        <div class="total-row-day">Wed</div>
+        <div class="total-row-val">-$9.00</div>
+      </div>
+      <div class="total-row" id="tr-3">
+        <div class="total-row-day">Thu</div>
+        <div class="total-row-val">-$10.80</div>
+      </div>
+      <div class="total-row" id="tr-4">
+        <div class="total-row-day">Fri</div>
+        <div class="total-row-val">-$12.60</div>
+      </div>
+    </div>
+    <div class="divider" id="total-divider"></div>
+    <div class="total-sum-row" id="total-sum">
+      <div class="total-sum-label">Weekly</div>
+      <div class="total-sum-val">-$12.60</div>
+    </div>
+    <div class="per-week-note" id="per-week-note">per trade, per week</div>
+  </div>
+
+</div>
+
+<script>
+// ── Easing ──────────────────────────────────────────────────────────────────
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+function easeOutBack(t) {
+  const c1 = 1.70158, c3 = c1 + 1;
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+}
+
+// ── Keyframe scheduler ──────────────────────────────────────────────────────
+const tasks = [];  // {startMs, durationMs, fn(progress)}
+
+function at(startMs, durationMs, fn) {
+  tasks.push({ startMs, durationMs, fn });
+}
+
+function tick(elapsed) {
+  for (const t of tasks) {
+    if (elapsed < t.startMs) continue;
+    const raw = (elapsed - t.startMs) / t.durationMs;
+    const p = Math.min(1, raw);
+    t.fn(p);
+  }
+}
+
+// ── Generic fade+slide-up helper ─────────────────────────────────────────────
+function fadeSlideUp(el, p) {
+  const e = easeOutCubic(p);
+  el.style.opacity = e;
+  el.style.transform = `translateY(${(1 - e) * 20}px) scale(${0.92 + 0.08 * e})`;
+}
+
+function fadeSlideRight(el, p) {
+  const e = easeOutCubic(p);
+  el.style.opacity = e;
+  el.style.transform = `translateX(${(1 - e) * 20}px)`;
+}
+
+function fadePop(el, p) {
+  const e = easeOutBack(p);
+  el.style.opacity = Math.min(1, p * 3);
+  el.style.transform = `scale(${e})`;
+}
+
+// ── Build schedule ───────────────────────────────────────────────────────────
+// Day cells: staggered 0→700ms (7 days, 100ms apart)
+for (let i = 0; i < 7; i++) {
+  const el = document.getElementById('day-' + i);
+  at(i * 120, 400, p => fadeSlideUp(el, p));
+}
+
+// Wednesday triple badge pops in after wed cell (2 * 120 + 300 = 540ms), delay extra 200ms
+at(740, 350, p => fadePop(document.getElementById('triple-badge'), p));
+
+// Total card slides in at 800ms
+at(800, 450, p => fadeSlideRight(document.getElementById('total-card'), p));
+
+// Running total rows stagger from 1000ms
+for (let i = 0; i < 5; i++) {
+  const el = document.getElementById('tr-' + i);
+  at(1000 + i * 180, 350, p => {
+    const e = easeOutCubic(p);
+    el.style.opacity = e;
+    el.style.transform = `translateX(${(1 - e) * 12}px)`;
+  });
+}
+
+// Divider + sum at 2050ms
+at(2050, 300, p => {
+  document.getElementById('total-divider').style.opacity = easeOutCubic(p);
+});
+at(2150, 400, p => {
+  const el = document.getElementById('total-sum');
+  const e = easeOutCubic(p);
+  el.style.opacity = e;
+  el.style.transform = `translateY(${(1 - e) * 8}px)`;
+});
+at(2450, 350, p => {
+  document.getElementById('per-week-note').style.opacity = easeOutCubic(p);
+});
+
+// Wednesday box pulse glow (2600ms+, repeating via sin)
+// handled in the loop below
+
+// ── Main loop ────────────────────────────────────────────────────────────────
+let startTime = null;
+let running = false;
+let rafId = null;
+
+function loop(ts) {
+  if (!startTime) startTime = ts;
+  const elapsed = ts - startTime;
+  tick(elapsed);
+
+  // Wednesday pulse glow after badge appears
+  if (elapsed > 1200) {
+    const phase = ((elapsed - 1200) / 800) * Math.PI;
+    const pulse = 0.25 + 0.20 * Math.abs(Math.sin(phase));
+    const wednesdayBox = document.querySelectorAll('.day-box.wednesday')[0];
+    if (wednesdayBox) {
+      wednesdayBox.style.boxShadow = `0 0 ${30 + 20 * Math.abs(Math.sin(phase))}px rgba(239,68,68,${pulse}), 0 0 60px rgba(239,68,68,${pulse * 0.5})`;
+    }
+  }
+
+  if (running) rafId = requestAnimationFrame(loop);
+}
+
+// ── Public API ────────────────────────────────────────────────────────────────
+function start() {
+  if (running) return;
+  running = true;
+  startTime = null;
+  rafId = requestAnimationFrame(loop);
+}
+
+// Click to start in browser preview
+document.addEventListener('click', () => { if (!running) start(); });
+</script>
+</body>
+</html>

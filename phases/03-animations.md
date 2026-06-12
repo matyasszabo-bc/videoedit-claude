@@ -26,36 +26,37 @@ When an animation instruction references a broker but does not include specific 
 
 ## Animation format
 
-All animations are built as **Remotion React components** and exported as:
+All animations are built as **standalone HTML files** and exported as:
 - **ProRes 4444 MOV** (transparent alpha) for overlay animations
 - **PNG** (transparent background) for static graphic inserts
 
-Both files are saved to the project's `animations/` subfolder.
+Both files are saved directly to the project's `animations/` subfolder (no `out/` subdirectory).
 
-### Remotion project structure
+### File structure
 
 ```
 <project_folder>/
 └── animations/
-    ├── src/
-    │   ├── index.tsx
-    │   ├── Root.tsx
-    │   └── <AnimationName>.tsx    # One file per animation
-    ├── public/
-    │   └── <logos, images>
-    └── out/
-        └── <AnimationName>.mov / .png
+    ├── <AnimationName>.html    # Source animation (standalone, self-contained)
+    └── <AnimationName>.mov     # Rendered ProRes 4444 output
 ```
 
-Each animation component gets its own `.tsx` file. `Root.tsx` registers all compositions.
+### Rendering HTML → MOV
+
+Use `scripts/render-html-to-mov.py` from the skill root. See [animation-technical.md](../video-skill/references/animation-technical.md) for full details and options.
+
+```bash
+python3 <skill_root>/scripts/render-html-to-mov.py \
+  --input  "<project>/animations/<AnimationName>.html" \
+  --output "<project>/animations/<AnimationName>.mov" \
+  --duration 10.0
+```
+
+Default: 1920×1080, 30fps. Only pass `--width`/`--height`/`--fps` to override. Always use `--input`/`--output` named flags — positional args are not supported.
 
 ## Stale check
 
-Before placing an animation on the timeline, check whether:
-1. A file with the same name already exists in `animations/out/`.
-2. The corresponding `.tsx` source file has been modified more recently than the output file.
-
-If the source is newer: warn the user and ask whether to re-render before placing.
+Before placing an animation on the timeline, check whether a `.mov` with the same name already exists in `animations/`. If the `.html` source is newer than the `.mov`, warn the user and ask whether to re-render before placing.
 
 ## Process
 
@@ -83,9 +84,9 @@ Before writing code, create the design in Figma on the project page:
 Build every animation component. Do not place any on the timeline yet.
 
 For each animation:
-- Create `<AnimationName>.tsx` in `animations/src/`
-- Register in `Root.tsx`
-- Export: `remotion still` for PNG, `remotion render --codec prores --prores-profile 4444` for MOV
+- Save the standalone HTML to `animations/<AnimationName>.html`
+- Run `scripts/render-html-to-mov.py` to produce the MOV in `animations/out/`
+- For static PNG: take a single screenshot with Playwright (`omit_background=True`) at the correct frame
 
 ### Step 5 — Place all animations
 
@@ -98,6 +99,77 @@ After all animations are rendered, place them on the timeline:
 ### Step 6 — Save
 
 Save the Premiere project. Save the Figma file.
+
+## HTML animation code pattern
+
+Every animation HTML must follow this exact structure — no exceptions:
+
+```js
+// 1. Easing functions (easeOutCubic, easeOutBack, easeInOutCubic as needed)
+
+// 2. Task scheduler
+const tasks = [];
+function at(startMs, durationMs, fn) { tasks.push({startMs, durationMs, fn}); }
+function tick(elapsed) {
+  for (const t of tasks) {
+    if (elapsed < t.startMs) continue;
+    t.fn(Math.min(1, (elapsed - t.startMs) / t.durationMs));
+  }
+}
+
+// 3. Schedule all keyframes with at()
+at(0, 900, p => { /* fade in */ });
+at(1400, 1100, p => { /* flip */ });
+// ...
+
+// 4. RAF loop — time-driven, NOT frame-counted
+let startTime = null, running = false;
+
+function loop(ts) {
+  if (!startTime) startTime = ts;
+  const elapsed = ts - startTime;
+  tick(elapsed);
+  // continuous effects (pulse glow, etc.) go here
+  if (running) requestAnimationFrame(loop);
+}
+
+// 5. Public start() — called by renderer and by click in browser preview
+function start() {
+  if (running) return;
+  running = true;
+  startTime = null;
+  requestAnimationFrame(loop);
+}
+
+// Click-to-start for browser preview testing
+document.addEventListener('click', () => { if (!running) start(); });
+```
+
+**Rules:**
+- `start()` must exist as a named global function — the renderer calls it.
+- Never auto-start on load (`start()` at the top level is forbidden).
+- Never use `setInterval` — always `requestAnimationFrame` + elapsed time.
+- All animation progress values `p` run 0→1; apply easing inside the callback.
+- Transparent canvas: never set a solid `body` background — footage shows through.
+
+## Animation timing
+
+All animations must feel slow and deliberate — the viewer is watching on a large screen and needs time to read every value.
+
+**Default durations (treat as minimums):**
+
+| Event | Duration |
+|---|---|
+| Card / scene fade-in | 800–1000ms |
+| Element slide-in / stagger step | 500–700ms |
+| Value pop-in (easeOutBack) | 600–800ms |
+| Flip / transform (easeInOutCubic) | 1000–1200ms |
+| Stagger delay between siblings | 200–300ms |
+| Hold on final state before loop ends | ≥2000ms |
+
+**Total animation length:** aim for 8–10s of visible motion before the loop settles into the hold state. The renderer `--duration` flag should be set to at least `total motion time + 2s hold`.
+
+Never rush element reveals. If something animates in under 400ms it will feel like a glitch, not a transition.
 
 ## Animation sizing
 
