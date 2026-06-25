@@ -26,7 +26,7 @@ from playwright.async_api import async_playwright
 async def render(html_path: Path, output_path: Path, duration: float, fps: int,
                  width: int, height: int, bg_color: str) -> None:
     frames_dir = Path(tempfile.mkdtemp(prefix="anim_frames_"))
-    frame_ms = 1000 / fps
+    frame_ms = int(1000 / fps)
     total_frames = int(duration * fps)
 
     print(f"Input:    {html_path}")
@@ -39,7 +39,7 @@ async def render(html_path: Path, output_path: Path, duration: float, fps: int,
         page = await context.new_page()
 
         await page.goto(f"file://{html_path.resolve()}", wait_until="domcontentloaded")
-        await page.wait_for_timeout(2000)
+        await page.wait_for_timeout(1500)
 
         # Strip page background so Playwright omit_background works correctly
         await page.evaluate(f"""
@@ -99,14 +99,60 @@ async def render(html_path: Path, output_path: Path, duration: float, fps: int,
             }
         """)
 
+        # Inject deterministic rAF + timer override BEFORE start()
+        # Overrides requestAnimationFrame, setInterval, setTimeout, and performance.now.
+        # Each __tickFrame(ms) advances the fake clock, fires due intervals/timeouts,
+        # then fires all pending rAF callbacks — all synchronously.
+        await page.evaluate("""
+            () => {
+                let fakeTime = 0;
+                const rafQueue = [];
+                const timers = new Map();
+                let timerId = 0;
+
+                performance.now = () => fakeTime;
+
+                window.requestAnimationFrame = (cb) => {
+                    rafQueue.push(cb);
+                    return rafQueue.length;
+                };
+                window.cancelAnimationFrame = () => {};
+
+                window.setInterval = (fn, ms) => {
+                    const id = ++timerId;
+                    timers.set(id, { fn, ms: ms || 0, nextFire: fakeTime + (ms || 0), repeat: true });
+                    return id;
+                };
+                window.clearInterval = (id) => { timers.delete(id); };
+
+                window.setTimeout = (fn, ms) => {
+                    const id = ++timerId;
+                    timers.set(id, { fn, ms: ms || 0, nextFire: fakeTime + (ms || 0), repeat: false });
+                    return id;
+                };
+                window.clearTimeout = (id) => { timers.delete(id); };
+
+                window.__tickFrame = (ms) => {
+                    fakeTime += ms;
+                    for (const [id, t] of [...timers]) {
+                        while (t.nextFire <= fakeTime) {
+                            t.fn();
+                            if (!t.repeat) { timers.delete(id); break; }
+                            t.nextFire += t.ms;
+                        }
+                    }
+                    const pending = rafQueue.splice(0);
+                    pending.forEach(cb => cb(fakeTime));
+                };
+            }
+        """)
+
         # Start the animation
         await page.evaluate("""
             () => {
-                // Try the most common trigger function names
                 if (typeof run === 'function') { run(); return; }
                 if (typeof start === 'function') { start(); return; }
                 if (typeof play === 'function') { play(); return; }
-                // Fallback: click the first button or play element
                 const btn = document.querySelector('#start, button, [class*="play"]');
                 if (btn) btn.click();
             }
@@ -115,6 +161,8 @@ async def render(html_path: Path, output_path: Path, duration: float, fps: int,
         print(f"Capturing frames...")
         for i in range(total_frames):
             frame_path = frames_dir / f"frame_{i:05d}.png"
+            # Advance animation clock by exactly one frame and repaint synchronously
+            await page.evaluate(f"window.__tickFrame({frame_ms})")
             await page.screenshot(
                 path=str(frame_path),
                 omit_background=True,
@@ -122,7 +170,6 @@ async def render(html_path: Path, output_path: Path, duration: float, fps: int,
             )
             if i % fps == 0:
                 print(f"  {i}/{total_frames} frames ({i / fps:.1f}s)")
-            await page.wait_for_timeout(frame_ms)
 
         await browser.close()
 

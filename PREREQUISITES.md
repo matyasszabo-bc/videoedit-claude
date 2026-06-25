@@ -9,11 +9,10 @@ Run `scripts/check-prerequisites.sh` to automatically verify all tools. The scri
 | **Adobe Premiere Pro** | Timeline editing, export | https://www.adobe.com/products/premiere.html |
 | **BuzzRolls MCP** | Premiere Pro MCP bridge (transcript, timeline control) | https://buzzrolls.studio — install the CEP panel, start the bridge before each session |
 | **ffmpeg** | Audio analysis, silence detection, ProRes render | `brew install ffmpeg` |
-| **Node.js ≥ 18** | Remotion renderer | https://nodejs.org |
-| **Remotion** | React-to-video animation renderer | `npm install -g remotion` (or per-project) |
+| **Python 3** | HTML animation renderer | `brew install python3` |
+| **Playwright (Python)** | Headless browser for frame capture | `pip3 install playwright && playwright install chromium` |
 | **BrokerChooser Private MCP** | Broker data: names, scores, logos | Internal — configured in `~/.claude/mcp.json` |
 | **Figma MCP** | Design reference and asset export | Configured in `~/.claude/mcp.json` with `design@brokerchooser.com` PAT |
-| **Python 3** | Silence detection helper script | `brew install python3` |
 
 ## MCP configuration
 
@@ -49,4 +48,4 @@ The following entries must be present in `~/.claude/mcp.json`:
 bash scripts/check-prerequisites.sh
 ```
 
-The script checks: ffmpeg, node, remotion, python3, and whether the MCP entries exist in `~/.claude/mcp.json`.
+The script checks: ffmpeg, python3, playwright, and whether the MCP entries exist in `~/.claude/mcp.json`.

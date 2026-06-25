@@ -45,7 +45,7 @@ zoom_level_b:   66    # Second alternating zoom level (%)
 ## Design
 
 ```
-figma_file_key:         TiTLnLU6yyOlOzSh0dfuuh
-figma_reference_node:   1542-67
+figma_file_key:         # REQUIRED — Figma file key (from the URL: figma.com/design/<key>/...)
+figma_reference_node:   # REQUIRED — node-id of the design reference page
 figma_project_page:     # Leave blank — Claude creates this automatically, named after project_name
 ```

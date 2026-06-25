@@ -32,7 +32,7 @@ For every animation:
 1. Create the design in Figma on the project page first.
 2. Use components and styles from the BrokerChooser design system.
 3. Reference `style/videostyle.md` for video-specific tokens.
-4. Take a screenshot and confirm with the user before building the Remotion component.
+4. Take a screenshot and confirm with the user before building the animation.
 
 This ensures animations match the brand and avoids wasted render time.
 

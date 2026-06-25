@@ -29,7 +29,7 @@ bash ~/.claude/plugins/video-skill/scripts/check-prerequisites.sh
 |---|---|
 | 1. Raw cut | Remove bad takes and off-script content using the screenplay |
 | 2. Silence removal | Detect and cut silences with ffmpeg, configurable threshold |
-| 3. Animations | Build React/Remotion animations from script instructions, place on timeline |
+| 3. Animations | Build HTML/CSS animations from script instructions, render to ProRes MOV, place on timeline |
 
 ## Slash commands
 
@@ -43,4 +43,4 @@ bash ~/.claude/plugins/video-skill/scripts/check-prerequisites.sh
 
 ## Requirements
 
-See [PREREQUISITES.md](PREREQUISITES.md) for the full list. Short version: Premiere Pro + BuzzRolls, ffmpeg, Node.js, Remotion, Python 3, BrokerChooser Private MCP, Figma MCP.
+See [PREREQUISITES.md](PREREQUISITES.md) for the full list. Short version: Premiere Pro + BuzzRolls, ffmpeg, Python 3, BrokerChooser Private MCP, Figma MCP.

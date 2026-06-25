@@ -34,8 +34,10 @@ Each command has its own reference file in `commands/`.
 ## General rules
 
 - **Name everything.** Every file, sequence, layer, Figma page, and animation must have a descriptive name. Never leave Premiere defaults (Sequence 01, etc.).
+- **Premiere bin structure**: every project must have `Footage`, `Animations`, and `Sound & Music` bins. See [references/naming-conventions.md](references/naming-conventions.md).
+- **Deleting files**: always use `trash` — never `rm` or permanent delete. Also remove the item from the Premiere project bin (via BuzzRolls or manually) so the project stays clean.
 - **Before placing anything on the timeline**, check whether the target track already has content at that position.
-- **Figma pages** for this project live at: `https://www.figma.com/design/TiTLnLU6yyOlOzSh0dfuuh/YouTube-video-content`. Create a new page named after the Premiere project file for each project.
-- **Design reference** for animations: read [style/videostyle.md](style/videostyle.md) and use the Figma reference page `node-id=1542-67` for tables, broker cards, and other visual components.
+- **Figma pages**: each project gets a dedicated page in the BrokerChooser Figma file, named after the Premiere project file. See [references/figma-workflow.md](references/figma-workflow.md).
+- **Design reference** for animations: read [style/videostyle.md](style/videostyle.md) and use the Figma reference page for tables, broker cards, and other visual components.
 - **Broker data** (names, scores, logos) must be fetched from the BrokerChooser Private MCP, not hardcoded.
-- **Stale animation check**: before rendering or re-placing an animation, verify the source `.tsx` / `.html` file has not changed since it was last placed on the timeline. If it has, warn the user and ask whether to re-render.
+- **Stale animation check**: before rendering or re-placing an animation, verify the source `.html` file has not changed since it was last placed on the timeline. If it has, warn the user and ask whether to re-render.

@@ -2,6 +2,20 @@
 
 Every file, sequence, layer, Figma frame, and animation must have a descriptive name. Never leave Premiere defaults (Sequence 01, Video 1, etc.).
 
+## Premiere project bins
+
+Every project must have these bins at the top level:
+
+| Bin | Contents |
+|---|---|
+| `Footage` | All raw camera clips |
+| `Animations` | All imported animation MOVs |
+| `Sound & Music` | Music tracks, SFX, any audio-only files |
+
+Create them at the start of the project. Import files directly into the matching bin — never leave clips loose in the project root.
+
+---
+
 ## Sequences
 
 | Type | Pattern | Example |
@@ -26,9 +40,10 @@ Every file, sequence, layer, Figma frame, and animation must have a descriptive 
 
 | Type | Pattern | Example |
 |---|---|---|
-| Remotion component | `<Type>-<description>.tsx` | `BrokerTable-pepperstone-mexem.tsx` |
-| Rendered video | `<Type>-<description>.mov` | `BrokerTable-pepperstone-mexem.mov` |
-| Rendered still | `<Type>-<description>.png` | `BrokerTable-pepperstone-mexem.png` |
+| HTML source | `ANIM-<number>_<kebab-description>.html` | `ANIM-15_swap-calendar.html` |
+| Rendered video | `ANIM-<number>_<kebab-description>.mov` | `ANIM-15_swap-calendar.mov` |
+| Variant | `ANIM-<number><letter>_<kebab-description>.html/.mov` | `ANIM-16B_positive-swap.html` |
+| Translated | `<lang>/ANIM-<number>_<kebab-description>.html/.mov` | `de/ANIM-15_swap-calendar.html` |
 
 Use lowercase with hyphens for filenames. No spaces.
 
